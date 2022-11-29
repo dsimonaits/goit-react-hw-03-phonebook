@@ -7,14 +7,25 @@ import { nanoid } from 'nanoid';
 
 class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    if (localStorage.getItem('contacts')) {
+      this.setState({
+        contacts: JSON.parse(localStorage.getItem('contacts')),
+      });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevState !== this.state) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
+  componentWillUnmount() {}
 
   addContact = data => {
     const id = nanoid();
@@ -58,7 +69,12 @@ class App extends Component {
           <ContactForm addContact={this.addContact} />
         </Section>
         <Section title="Contacts" border="true">
-          <Filter value={filter} onChange={this.filterValue} />
+          {this.state.contacts.length === 0 ? (
+            <p>Sorry your contact list is empty. Add someone.</p>
+          ) : (
+            <Filter value={filter} onChange={this.filterValue} />
+          )}
+
           <ContactList
             contacts={contactsByName}
             onDeleteContact={this.deleteContact}
